@@ -28,7 +28,7 @@ gameplay mechanics ⏳.
 ⚠️ **This is a simulation only.**  
 🛡️ No system commands, files, or destructive actions are performed.
 
-
+---
 
 ## ✨ Features
 
@@ -39,7 +39,7 @@ gameplay mechanics ⏳.
 - 🏆 Survival victory after six safe rounds
 - 🚪 Safe exit at any time
 
-
+---
 
 ## 🎛️ Controls
 
@@ -49,7 +49,7 @@ gameplay mechanics ⏳.
 | `F` | 🔫 Fire |
 | `Q` | 🚪 Quit |
 
-
+---
 
 ## 💻 Supported Platforms
 
@@ -58,7 +58,7 @@ gameplay mechanics ⏳.
 - 🍎 MacOS (ARM64)
 - 🤖 Android (Termux, aarch64)
 
-
+---
 
 ## 🗺️ Roadmap
 
@@ -70,13 +70,13 @@ gameplay mechanics ⏳.
 - [x] 🔐 Integrity checks (SHA-256)
 - [x] 🌐 Static project page (GitHub Pages)
 
-
+---
 
 ## 📜 License
 
 MIT License
 
-
+---
 
 ## 🎬 Inspiration
 
