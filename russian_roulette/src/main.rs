@@ -1,4 +1,3 @@
-
 use rand::{rng, seq::SliceRandom};
 use std::{
     io::{self, Write},
@@ -8,7 +7,7 @@ use std::{
 
 const CHAMBERS: usize = 6;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 enum Chamber {
     Empty,
     Bullet,
@@ -17,36 +16,31 @@ enum Chamber {
 fn main() {
     banner();
 
-    let mut chambers = load_chambers();
-    let mut position = 0;
+    let mut rounds_survived = 0;
 
     loop {
-        if position >= CHAMBERS {
-            victory();
-            break;
-        }
+        wait_for_trigger(rounds_survived + 1);
 
-        wait_for_trigger(position + 1);
-
+        let mut chambers = spin_cylinder();
         suspense();
 
-        match chambers[position] {
+        match chambers[0] {
             Chamber::Empty => {
-                click(position + 1);
-                position += 1;
+                rounds_survived += 1;
+                click(rounds_survived);
             }
             Chamber::Bullet => {
                 boom();
-                game_over();
+                game_over(rounds_survived);
                 break;
             }
         }
     }
 }
 
-/* ───────────────────────── CORE GAME LOGIC ───────────────────────── */
+/* ───────────────────────── GAME MECHANICS ───────────────────────── */
 
-fn load_chambers() -> Vec<Chamber> {
+fn spin_cylinder() -> Vec<Chamber> {
     let mut chambers = vec![Chamber::Empty; CHAMBERS - 1];
     chambers.push(Chamber::Bullet);
     chambers.shuffle(&mut rng());
@@ -61,12 +55,11 @@ fn banner() {
     println!("══════════════════════════════════════════");
     println!("• 6 chambers");
     println!("• 1 bullet");
-    println!("• Survive them all… or don’t 😈");
     println!();
 }
 
 fn wait_for_trigger(round: usize) {
-    print!("Round {round} — press ENTER to pull the trigger ");
+    print!("Round {round} — press ENTER to spin & pull trigger ");
     let _ = io::stdout().flush();
     let _ = io::stdin().read_line(&mut String::new());
 }
@@ -76,7 +69,7 @@ fn suspense() {
     let _ = io::stdout().flush();
 
     for _ in 0..3 {
-        thread::sleep(Duration::from_millis(600));
+        thread::sleep(Duration::from_millis(500));
         print!(".");
         let _ = io::stdout().flush();
     }
@@ -84,40 +77,37 @@ fn suspense() {
 }
 
 fn click(round: usize) {
-    println!("Trigger Pulled! But 😅  Chamber {round} was empty.");
+    println!("Pulling Trigger!!!");
+    println!("😅  You survived round {round}.");
     println!();
 }
 
 fn boom() {
-    println!("Shot Fired ---> 💥  B A N G  💥");
+    println!("⁍ SHOT FIRED ⁍");
+    println!("💥  B A N G  💥");
     thread::sleep(Duration::from_secs(1));
 }
 
-fn game_over() {
+fn game_over(rounds: usize) {
     println!();
     println!("☠️  GAME OVER");
-    println!("The chamber was loaded.");
-    fake_consequence();
+    println!("Rounds survived: {rounds}");
+    // fake_consequence();
 }
 
-fn victory() {
-    println!("🎉  YOU SURVIVED 🎉");
-    println!("All chambers were empty.");
-    println!("Luck favors the reckless.");
-}
+/* ───────────────────────── SAFE PRANK ───────────────────────── */
 
-/* ───────────────────────── SAFE PRANK CONSEQUENCE ───────────────────────── */
-
+// Function is inactice
 fn fake_consequence() {
     println!();
-    println!("System integrity compromised.");
-    println!("Initiating emergency protocol…");
+    println!("System anomaly detected.");
+    println!("Initiating containment protocol…");
 
-    for i in (0..=100).step_by(25) {
-        println!("Processing… {i}%");
-        thread::sleep(Duration::from_millis(500));
+    for i in (0..=100).step_by(20) {
+        println!("Stabilizing… {i}%");
+        thread::sleep(Duration::from_millis(400));
     }
 
-    println!("Rollback successful.");
-    println!("No damage done. Relax 😁");
+    println!("System stable.");
+    println!("No damage done. Breathe 😁");
 }
