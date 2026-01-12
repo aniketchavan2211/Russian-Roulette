@@ -52,3 +52,26 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: russian_roulette-${{ github.ref_name }}-x86_64-windows.zip
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build macOS release
+        run: cargo build --release
+
+      - name: Package macOS binary
+        run: |
+          mkdir dist
+          cp target/release/russian_roulette dist/
+          tar -czvf russian_roulette-${{ github.ref_name }}-macos-arm64.tar.gz dist/*
+
+      - name: Upload macOS artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: russian_roulette-${{ github.ref_name }}-macos-arm64.tar.gz
