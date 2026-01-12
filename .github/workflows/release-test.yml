@@ -26,6 +26,15 @@ jobs:
           VERSION=${{ github.ref_name }}
           tar -czvf russian_roulette-${VERSION}-x86_64-linux.tar.gz dist/*
 
+      - name: Generate checksums
+        run: |
+          sha256sum russian_roulette-* > SHA256SUMS-linux.txt
+
+      - name: Upload checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SHA256SUMS-linux.txt
+
       - name: Upload Linux artifact
         uses: softprops/action-gh-release@v2
         with:
@@ -47,6 +56,18 @@ jobs:
           $VERSION = "${{ github.ref_name }}"
           copy target\release\russian_roulette.exe dist\
           powershell Compress-Archive dist russian_roulette-$VERSION-x86_64-windows.zip
+
+      - name: Generate checksums
+        run: |
+            Get-FileHash russian_roulette-* -Algorithm SHA256 |
+              ForEach-Object {
+                "$($_.Hash)  $($_.Path)"
+              } > SHA256SUMS-windows.txt
+
+      - name: Upload checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SHA256SUMS-windows.txt
 
       - name: Upload Windows artifact
         uses: softprops/action-gh-release@v2
@@ -70,6 +91,15 @@ jobs:
           mkdir dist
           cp target/release/russian_roulette dist/
           tar -czvf russian_roulette-${{ github.ref_name }}-macos-arm64.tar.gz dist/*
+
+      - name: Generate checksums
+        run: |
+          shasum -a 256 russian_roulette-* > SHA256SUMS-macos.txt
+
+      - name: Upload checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SHA256SUMS-macos.txt
 
       - name: Upload macOS artifact
         uses: softprops/action-gh-release@v2
@@ -105,6 +135,15 @@ jobs:
           mkdir dist
           cp target/aarch64-linux-android/release/russian_roulette dist/
           tar -czvf russian_roulette-${{ github.ref_name }}-aarch64-linux-android.tar.gz dist/*
+
+      - name: Generate checksums
+        run: |
+          sha256sum russian_roulette-* > SHA256SUMS-android.txt
+
+      - name: Upload checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SHA256SUMS-android.txt
 
       - name: Upload Android artifact
         uses: softprops/action-gh-release@v2
