@@ -76,4 +76,4 @@ MIT License
 
 ## Inspiration
 
-[![ I made the DUMBEST game of all time! - you should never play it ]](https://www.youtube.com/shorts/oXSekoOazhA)
+[ I made the DUMBEST game of all time! - you should never play it ](https://www.youtube.com/shorts/oXSekoOazhA)
