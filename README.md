@@ -73,3 +73,7 @@ No system commands, files, or destructive actions are performed.
 ## License
 
 MIT License
+
+## Inspiration
+
+[![ I made the DUMBEST game of all time! - you should never play it ](https://www.youtube.com/shorts/oXSekoOazhA)
