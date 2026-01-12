@@ -1,6 +1,12 @@
 # Russian Roulette (TUI)
 
+![Squid Game Revolver at Head Point](https://github.com/aniketchavan2211/Russian-Roulette/blob/98790119582c0bc06a4f94cfeac5a4f1b3efcf59/assets/images/Squid%20Game%20-%20Revolver%20at%20head%20point.jpg)
+
 ## About the Game
+
+![Rússkaya rulétka)](https://github.com/aniketchavan2211/Russian-Roulette/blob/98790119582c0bc06a4f94cfeac5a4f1b3efcf59/assets/images/Rosyjska%20Ruletka.png)
+
+***Rússkaya rulétka)***
 
 **Russian roulette** is a potentially lethal game of chance in
 which a player places a ***single round*** in a ***revolver***,
