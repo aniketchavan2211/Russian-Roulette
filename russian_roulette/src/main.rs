@@ -1,5 +1,9 @@
 use rand::{rng, seq::SliceRandom};
-use std::io;
+use std::{
+    io,
+    thread,
+    time::Duration,
+};
 
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -17,6 +21,7 @@ use ratatui::{
 
 const CHAMBERS: usize = 6;
 const MAX_ROUNDS: usize = 6;
+const SUSPENSE_DELAY_MS: u64 = 600; //  suspense timing
 
 #[derive(Clone, Copy)]
 enum Chamber {
@@ -26,7 +31,7 @@ enum Chamber {
 
 enum GameState {
     Playing,
-    Waiting, // waiting for "next"
+    Waiting,
     Dead,
     Won,
 }
@@ -49,51 +54,7 @@ fn main() -> Result<(), io::Error> {
 
     /* ─── Main loop ─── */
     loop {
-        terminal.draw(|f| {
-            let layout = Layout::default()
-                .direction(Direction::Vertical)
-                .margin(2)
-                .constraints([
-                    Constraint::Length(3), // title
-                    Constraint::Length(5), // menu
-                    Constraint::Length(3), // info
-                    Constraint::Min(1),    // message
-                ])
-                .split(f.size());
-
-            let title = Paragraph::new("🔫 RUSSIAN ROULETTE 🔫")
-                .alignment(Alignment::Center)
-                .style(
-                    Style::default()
-                        .fg(Color::Red)
-                        .add_modifier(Modifier::BOLD),
-                )
-                .block(Block::default().borders(Borders::ALL));
-
-            let menu = Paragraph::new(
-                "[ S ] Spin Cylinder    [ F ] Fire    [ Q ] Quit",
-            )
-            .alignment(Alignment::Center)
-            .style(Style::default().fg(Color::Cyan))
-            .block(Block::default().borders(Borders::ALL).title("Menu"));
-
-            let info = Paragraph::new(format!(
-                "Round {}/{}",
-                rounds, MAX_ROUNDS
-            ))
-            .alignment(Alignment::Center)
-            .block(Block::default().borders(Borders::ALL).title("Status"));
-
-            let msg = Paragraph::new(message.as_str())
-                .alignment(Alignment::Center)
-                .style(Style::default().fg(message_color))
-                .block(Block::default().borders(Borders::ALL).title("Message"));
-
-            f.render_widget(title, layout[0]);
-            f.render_widget(menu, layout[1]);
-            f.render_widget(info, layout[2]);
-            f.render_widget(msg, layout[3]);
-        })?;
+        terminal.draw(|f| draw_ui(f, rounds, &message, message_color))?;
 
         if let Event::Key(key) = event::read()? {
             match state {
@@ -107,25 +68,41 @@ fn main() -> Result<(), io::Error> {
                     }
 
                     KeyCode::Char('f') => {
+                        // ── Step 1: show trigger pulled
+                        message = "Trigger Pulled !!!".to_string();
+                        message_color = Color::Yellow;
+
+                        // draw THIS frame
+                        terminal.draw(|f| {
+                            draw_ui(f, rounds, &message, message_color)
+                        })?;
+
+                        // ── Step 2: suspense delay
+                        thread::sleep(Duration::from_millis(SUSPENSE_DELAY_MS));
+
+                        // ── Step 3: reveal outcome
                         match chambers[0] {
                             Chamber::Empty => {
                                 rounds += 1;
 
                                 if rounds >= MAX_ROUNDS {
                                     state = GameState::Won;
-                                    message = "🎉 You survived all rounds! Press any key.".to_string();
-                                    message_color = Color::Yellow;
+                                    message = "🎉 You survived all rounds! Press any key."
+                                        .to_string();
+                                    message_color = Color::Green;
                                 } else {
                                     state = GameState::Waiting;
                                     message =
-                                        "😅 Click… safe. Press any key for next round.".to_string();
+                                        "😅 No shot fired. You are safe. Press any key."
+                                            .to_string();
                                     message_color = Color::Green;
                                 }
                             }
                             Chamber::Bullet => {
                                 state = GameState::Dead;
                                 message =
-                                    "💥 BANG! You are dead. Press any key to exit.".to_string();
+                                    "💥 BANG! You are dead. Press any key to exit."
+                                        .to_string();
                                 message_color = Color::Red;
                             }
                         }
@@ -135,7 +112,6 @@ fn main() -> Result<(), io::Error> {
                 },
 
                 GameState::Waiting => {
-                    // any key continues to next round
                     chambers = spin();
                     state = GameState::Playing;
                     message = "Next round. Press [S] to spin the cylinder.".to_string();
@@ -143,7 +119,6 @@ fn main() -> Result<(), io::Error> {
                 }
 
                 GameState::Dead | GameState::Won => {
-                    // wait for key, then exit
                     break;
                 }
             }
@@ -155,6 +130,59 @@ fn main() -> Result<(), io::Error> {
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
     Ok(())
+}
+
+/* ─── UI ─── */
+
+fn draw_ui(
+    f: &mut ratatui::Frame,
+    rounds: usize,
+    message: &str,
+    color: Color,
+) {
+    let layout = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(2)
+        .constraints([
+            Constraint::Length(3),
+            Constraint::Length(5),
+            Constraint::Length(3),
+            Constraint::Min(1),
+        ])
+        .split(f.size());
+
+    let title = Paragraph::new("🔫 RUSSIAN ROULETTE 🔫")
+        .alignment(Alignment::Center)
+        .style(
+            Style::default()
+                .fg(Color::Red)
+                .add_modifier(Modifier::BOLD),
+        )
+        .block(Block::default().borders(Borders::ALL));
+
+    let menu = Paragraph::new(
+        "[ S ] Spin Cylinder    [ F ] Fire    [ Q ] Quit",
+    )
+    .alignment(Alignment::Center)
+    .style(Style::default().fg(Color::Cyan))
+    .block(Block::default().borders(Borders::ALL).title("Menu"));
+
+    let info = Paragraph::new(format!(
+        "Round {}/{}",
+        rounds, MAX_ROUNDS
+    ))
+    .alignment(Alignment::Center)
+    .block(Block::default().borders(Borders::ALL).title("Status"));
+
+    let msg = Paragraph::new(message)
+        .alignment(Alignment::Center)
+        .style(Style::default().fg(color))
+        .block(Block::default().borders(Borders::ALL).title("Message"));
+
+    f.render_widget(title, layout[0]);
+    f.render_widget(menu, layout[1]);
+    f.render_widget(info, layout[2]);
+    f.render_widget(msg, layout[3]);
 }
 
 /* ─── Helper ─── */
