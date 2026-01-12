@@ -3,7 +3,7 @@ name: Test Release Build
 on:
   push:
     tags:
-      - "v1.3.0"
+      - "v*"
 
 jobs:
   build:
