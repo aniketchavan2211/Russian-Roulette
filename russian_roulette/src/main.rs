@@ -6,6 +6,7 @@ use std::{
 };
 
 const CHAMBERS: usize = 6;
+const MAX_ROUNDS: usize = 6;
 
 #[derive(Clone, Copy, Debug)]
 enum Chamber {
@@ -16,23 +17,52 @@ enum Chamber {
 fn main() {
     banner();
 
-    let mut rounds_survived = 0;
+    let mut rounds_played = 0;
+    let mut chambers = spin_cylinder();
 
     loop {
-        wait_for_trigger(rounds_survived + 1);
+        if rounds_played >= MAX_ROUNDS {
+            victory();
+            break;
+        }
 
-        let mut chambers = spin_cylinder();
-        suspense();
+        print_prompt(rounds_played + 1);
 
-        match chambers[0] {
-            Chamber::Empty => {
-                rounds_survived += 1;
-                click(rounds_survived);
+        let mut input = String::new();
+        if io::stdin().read_line(&mut input).is_err() {
+            println!("Input error. Exiting.");
+            break;
+        }
+
+        match input.trim().to_lowercase().as_str() {
+            "s" | "spin" => {
+                chambers = spin_cylinder();
+                println!("🔄 Cylinder spined.");
             }
-            Chamber::Bullet => {
-                boom();
-                game_over(rounds_survived);
+
+            "f" | "fire" => {
+                suspense();
+
+                match chambers[0] {
+                    Chamber::Empty => {
+                        rounds_played += 1;
+                        click(rounds_played);
+                    }
+                    Chamber::Bullet => {
+                        boom();
+                        game_over(rounds_played);
+                        break;
+                    }
+                }
+            }
+
+            "q" | "e" | "quit" | "exit" => {
+                println!("Exiting game. Cowardice is a valid survival strategy 😈");
                 break;
+            }
+
+            _ => {
+                println!("Unknown command. Use: [s]pin, [f]ire, [q]uit");
             }
         }
     }
@@ -53,19 +83,24 @@ fn banner() {
     println!("══════════════════════════════════════════");
     println!("🔫  R U S S I A N   R O U L E T T E  🔫");
     println!("══════════════════════════════════════════");
-    println!("• 6 chambers");
-    println!("• 1 bullet");
+    println!("Rules:");
+    println!("• 6 chambers, 1 bullet");
+    println!("• Max 6 rounds");
+    println!("• Spin as much as you want");
+    println!("• Fire when ready");
+    println!("• Quit anytime with q / e / Ctrl+C");
     println!();
 }
 
-fn wait_for_trigger(round: usize) {
-    print!("Round {round} — press ENTER to spin & pull trigger ");
+fn print_prompt(round: usize) {
+    println!("──────────────────────────────────────────");
+    println!("Round {round}/{MAX_ROUNDS}");
+    print!("Choose action [s]pin | [f]ire | [q]uit → ");
     let _ = io::stdout().flush();
-    let _ = io::stdin().read_line(&mut String::new());
 }
 
 fn suspense() {
-    print!("Spinning cylinder");
+    print!("Pulling trigger");
     let _ = io::stdout().flush();
 
     for _ in 0..3 {
@@ -77,9 +112,8 @@ fn suspense() {
 }
 
 fn click(round: usize) {
-    println!("Pulling Trigger!!!");
-    println!("😅  You survived round {round}.");
-    println!();
+    println!("Trigger Pulled !!!");
+    println!(" 😅  You survived round {round}.");
 }
 
 fn boom() {
@@ -92,22 +126,11 @@ fn game_over(rounds: usize) {
     println!();
     println!("☠️  GAME OVER");
     println!("Rounds survived: {rounds}");
-    // fake_consequence();
 }
 
-/* ───────────────────────── SAFE PRANK ───────────────────────── */
-
-// Function is inactice
-fn fake_consequence() {
+fn victory() {
     println!();
-    println!("System anomaly detected.");
-    println!("Initiating containment protocol…");
-
-    for i in (0..=100).step_by(20) {
-        println!("Stabilizing… {i}%");
-        thread::sleep(Duration::from_millis(400));
-    }
-
-    println!("System stable.");
-    println!("No damage done. Breathe 😁");
+    println!("🎉 CONGRATULATIONS 🎉");
+    println!("You survived all {MAX_ROUNDS} rounds.");
+    println!("Luck, courage, or both.");
 }

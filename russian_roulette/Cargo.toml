@@ -1,10 +1,19 @@
 [package]
 name = "russian_roulette"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2024"
 authors = ["Aniket Chavan"]
-description = "A safe, cross-platform prank game written in Rust"
+repository = "https://github.com/aniketchavan2211/Russian-Roulette.git"
 license = "MIT"
+readme = "README.md"
+
+description = """
+A safe, cross-platform terminal game written in Rust that simulates
+Russian Roulette mechanics. The revolver cylinder spins every round,
+randomly placing a single bullet among six chambers. Each trigger pull
+either results in survival or immediate game over. No system commands,
+file operations, or destructive behavior are performed.
+"""
 
 [dependencies]
 rand = "0.9"
