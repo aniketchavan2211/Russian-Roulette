@@ -4,11 +4,9 @@
 
 ## About the Game
 
-![Rússkaya rulétka)](https://github.com/aniketchavan2211/Russian-Roulette/blob/98790119582c0bc06a4f94cfeac5a4f1b3efcf59/assets/images/Rosyjska%20Ruletka.png)
+<img src="https://github.com/aniketchavan2211/Russian-Roulette/blob/98790119582c0bc06a4f94cfeac5a4f1b3efcf59/assets/images/Rosyjska%20Ruletka.png" alt="Rússkaya rulétka" width="300" height="200">
 
-***Rússkaya rulétka)***
-
-**Russian roulette** is a potentially lethal game of chance in
+**Russian roulette**(***Rússkaya rulétka***) is a potentially lethal game of chance in
 which a player places a ***single round*** in a ***revolver***,
 spins the cylinder, places the muzzle against the head or body
 (their opponent's or their own),
