@@ -66,7 +66,7 @@ No system commands, files, or destructive actions are performed.
 - [x] macOS build
 - [x] Android CI build
 - [X] Integrity checks (SHA-256)
-- [ ] Static project page (GitHub Pages)
+- [x] Static project page (GitHub Pages)
 
 ---
 
@@ -76,4 +76,4 @@ MIT License
 
 ## Inspiration
 
-![ I made the DUMBEST game of all time! - you should never play it ]](https://www.youtube.com/shorts/oXSekoOazhA)
+[![ I made the DUMBEST game of all time! - you should never play it ]](https://www.youtube.com/shorts/oXSekoOazhA)
