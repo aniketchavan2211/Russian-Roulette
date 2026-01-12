@@ -65,7 +65,7 @@ No system commands, files, or destructive actions are performed.
 - [x] GitHub Actions CI (Linux & Windows)
 - [x] macOS build
 - [x] Android CI build
-- [ ] Integrity checks (SHA-256)
+- [X] Integrity checks (SHA-256)
 - [ ] Static project page (GitHub Pages)
 
 ---
