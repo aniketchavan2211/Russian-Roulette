@@ -1,5 +1,19 @@
 # Russian Roulette (TUI)
 
+## About the Game
+
+**Russian roulette** is a potentially lethal game of chance in
+which a player places a ***single round*** in a ***revolver***,
+spins the cylinder, places the muzzle against the head or body
+(their opponent's or their own),
+and pulls the trigger. If the loaded chamber aligns with the barrel after
+cocking (with a single-action revolver),
+or is in the position which will be rotated to the barrel upon pulling the
+trigger (double-action),
+the weapon fires.
+
+[READ MORE the Game at Wikipedia](https://en.wikipedia.org/wiki/Russian_roulette#Origin)
+
 A safe, cross-platform **terminal-based Russian Roulette game** written in Rust.
 The game uses a text user interface (TUI) with real-time input and suspense-based
 gameplay mechanics.
