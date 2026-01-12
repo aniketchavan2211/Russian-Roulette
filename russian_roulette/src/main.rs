@@ -1,136 +1,167 @@
 use rand::{rng, seq::SliceRandom};
-use std::{
-    io::{self, Write},
-    thread,
-    time::Duration,
+use std::io;
+
+use crossterm::{
+    event::{self, Event, KeyCode},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
+
+use ratatui::{
+    backend::CrosstermBackend,
+    layout::{Alignment, Constraint, Direction, Layout},
+    style::{Color, Modifier, Style},
+    widgets::{Block, Borders, Paragraph},
+    Terminal,
 };
 
 const CHAMBERS: usize = 6;
 const MAX_ROUNDS: usize = 6;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 enum Chamber {
     Empty,
     Bullet,
 }
 
-fn main() {
-    banner();
+enum GameState {
+    Playing,
+    Waiting, // waiting for "next"
+    Dead,
+    Won,
+}
 
-    let mut rounds_played = 0;
-    let mut chambers = spin_cylinder();
+fn main() -> Result<(), io::Error> {
+    /* ─── Terminal setup ─── */
+    enable_raw_mode()?;
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen)?;
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
 
+    /* ─── Game state ─── */
+    let mut rounds = 0;
+    let mut chambers = spin();
+    let mut state = GameState::Playing;
+
+    let mut message = "Press [S] to spin the cylinder.".to_string();
+    let mut message_color = Color::Cyan;
+
+    /* ─── Main loop ─── */
     loop {
-        if rounds_played >= MAX_ROUNDS {
-            victory();
-            break;
-        }
+        terminal.draw(|f| {
+            let layout = Layout::default()
+                .direction(Direction::Vertical)
+                .margin(2)
+                .constraints([
+                    Constraint::Length(3), // title
+                    Constraint::Length(5), // menu
+                    Constraint::Length(3), // info
+                    Constraint::Min(1),    // message
+                ])
+                .split(f.size());
 
-        print_prompt(rounds_played + 1);
+            let title = Paragraph::new("🔫 RUSSIAN ROULETTE 🔫")
+                .alignment(Alignment::Center)
+                .style(
+                    Style::default()
+                        .fg(Color::Red)
+                        .add_modifier(Modifier::BOLD),
+                )
+                .block(Block::default().borders(Borders::ALL));
 
-        let mut input = String::new();
-        if io::stdin().read_line(&mut input).is_err() {
-            println!("Input error. Exiting.");
-            break;
-        }
+            let menu = Paragraph::new(
+                "[ S ] Spin Cylinder    [ F ] Fire    [ Q ] Quit",
+            )
+            .alignment(Alignment::Center)
+            .style(Style::default().fg(Color::Cyan))
+            .block(Block::default().borders(Borders::ALL).title("Menu"));
 
-        match input.trim().to_lowercase().as_str() {
-            "s" | "spin" => {
-                chambers = spin_cylinder();
-                println!("🔄 Cylinder spined.");
-            }
+            let info = Paragraph::new(format!(
+                "Round {}/{}",
+                rounds, MAX_ROUNDS
+            ))
+            .alignment(Alignment::Center)
+            .block(Block::default().borders(Borders::ALL).title("Status"));
 
-            "f" | "fire" => {
-                suspense();
+            let msg = Paragraph::new(message.as_str())
+                .alignment(Alignment::Center)
+                .style(Style::default().fg(message_color))
+                .block(Block::default().borders(Borders::ALL).title("Message"));
 
-                match chambers[0] {
-                    Chamber::Empty => {
-                        rounds_played += 1;
-                        click(rounds_played);
+            f.render_widget(title, layout[0]);
+            f.render_widget(menu, layout[1]);
+            f.render_widget(info, layout[2]);
+            f.render_widget(msg, layout[3]);
+        })?;
+
+        if let Event::Key(key) = event::read()? {
+            match state {
+                GameState::Playing => match key.code {
+                    KeyCode::Char('q') => break,
+
+                    KeyCode::Char('s') => {
+                        chambers = spin();
+                        message = "Cylinder spun. Press [F] to pull the trigger.".to_string();
+                        message_color = Color::Cyan;
                     }
-                    Chamber::Bullet => {
-                        boom();
-                        game_over(rounds_played);
-                        break;
+
+                    KeyCode::Char('f') => {
+                        match chambers[0] {
+                            Chamber::Empty => {
+                                rounds += 1;
+
+                                if rounds >= MAX_ROUNDS {
+                                    state = GameState::Won;
+                                    message = "🎉 You survived all rounds! Press any key.".to_string();
+                                    message_color = Color::Yellow;
+                                } else {
+                                    state = GameState::Waiting;
+                                    message =
+                                        "😅 Click… safe. Press any key for next round.".to_string();
+                                    message_color = Color::Green;
+                                }
+                            }
+                            Chamber::Bullet => {
+                                state = GameState::Dead;
+                                message =
+                                    "💥 BANG! You are dead. Press any key to exit.".to_string();
+                                message_color = Color::Red;
+                            }
+                        }
                     }
+
+                    _ => {}
+                },
+
+                GameState::Waiting => {
+                    // any key continues to next round
+                    chambers = spin();
+                    state = GameState::Playing;
+                    message = "Next round. Press [S] to spin the cylinder.".to_string();
+                    message_color = Color::Cyan;
                 }
-            }
 
-            "q" | "e" | "quit" | "exit" => {
-                println!("Exiting game. Cowardice is a valid survival strategy 😈");
-                break;
-            }
-
-            _ => {
-                println!("Unknown command. Use: [s]pin, [f]ire, [q]uit");
+                GameState::Dead | GameState::Won => {
+                    // wait for key, then exit
+                    break;
+                }
             }
         }
     }
+
+    /* ─── Cleanup ─── */
+    disable_raw_mode()?;
+    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+    terminal.show_cursor()?;
+    Ok(())
 }
 
-/* ───────────────────────── GAME MECHANICS ───────────────────────── */
+/* ─── Helper ─── */
 
-fn spin_cylinder() -> Vec<Chamber> {
+fn spin() -> Vec<Chamber> {
     let mut chambers = vec![Chamber::Empty; CHAMBERS - 1];
     chambers.push(Chamber::Bullet);
     chambers.shuffle(&mut rng());
     chambers
-}
-
-/* ───────────────────────── PRESENTATION ───────────────────────── */
-
-fn banner() {
-    println!("══════════════════════════════════════════");
-    println!("🔫  R U S S I A N   R O U L E T T E  🔫");
-    println!("══════════════════════════════════════════");
-    println!("Rules:");
-    println!("• 6 chambers, 1 bullet");
-    println!("• Max 6 rounds");
-    println!("• Spin as much as you want");
-    println!("• Fire when ready");
-    println!("• Quit anytime with q / e / Ctrl+C");
-    println!();
-}
-
-fn print_prompt(round: usize) {
-    println!("──────────────────────────────────────────");
-    println!("Round {round}/{MAX_ROUNDS}");
-    print!("Choose action [s]pin | [f]ire | [q]uit → ");
-    let _ = io::stdout().flush();
-}
-
-fn suspense() {
-    print!("Pulling trigger");
-    let _ = io::stdout().flush();
-
-    for _ in 0..3 {
-        thread::sleep(Duration::from_millis(500));
-        print!(".");
-        let _ = io::stdout().flush();
-    }
-    println!();
-}
-
-fn click(round: usize) {
-    println!("Trigger Pulled !!!");
-    println!(" 😅  You survived round {round}.");
-}
-
-fn boom() {
-    println!("⁍ SHOT FIRED ⁍");
-    println!("💥  B A N G  💥");
-    thread::sleep(Duration::from_secs(1));
-}
-
-fn game_over(rounds: usize) {
-    println!();
-    println!("☠️  GAME OVER");
-    println!("Rounds survived: {rounds}");
-}
-
-fn victory() {
-    println!();
-    println!("🎉 CONGRATULATIONS 🎉");
-    println!("You survived all {MAX_ROUNDS} rounds.");
-    println!("Luck, courage, or both.");
 }
