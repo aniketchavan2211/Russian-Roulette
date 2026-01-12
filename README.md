@@ -53,6 +53,7 @@ No system commands, files, or destructive actions are performed.
 
 - Linux (x86_64)
 - Windows (x86_64)
+- MacOS (ARM64)
 - Android (Termux, aarch64)
 
 ---
@@ -62,8 +63,8 @@ No system commands, files, or destructive actions are performed.
 - [x] Core gameplay logic
 - [x] Terminal UI
 - [x] GitHub Actions CI (Linux & Windows)
-- [ ] macOS build
-- [ ] Android CI build
+- [x] macOS build
+- [x] Android CI build
 - [ ] Integrity checks (SHA-256)
 - [ ] Static project page (GitHub Pages)
 
