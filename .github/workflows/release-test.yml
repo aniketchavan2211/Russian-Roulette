@@ -23,7 +23,8 @@ jobs:
         run: |
           mkdir dist
           cp target/release/russian_roulette dist/
-          tar -czvf russian_roulette-x86_64-linux.tar.gz dist/*
+          VERSION=${{ github.ref_name }}
+          tar -czvf russian_roulette-${VERSION}-x86_64-linux.tar.gz dist/*
 
       - name: Upload Linux artifact
         uses: softprops/action-gh-release@v2
@@ -43,8 +44,9 @@ jobs:
       - name: Package Windows binary
         run: |
           mkdir dist
+          $VERSION = "${{ github.ref_name }}"
           copy target\release\russian_roulette.exe dist\
-          powershell Compress-Archive dist russian_roulette-x86_64-windows.zip
+          powershell Compress-Archive dist russian_roulette-$VERSION-x86_64-windows.zip
 
       - name: Upload Windows artifact
         uses: softprops/action-gh-release@v2
