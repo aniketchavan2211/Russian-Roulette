@@ -1,0 +1,10 @@
+[package]
+name = "russian_roulette"
+version = "1.0.0"
+edition = "2024"
+authors = ["Aniket Chavan"]
+description = "A safe, cross-platform prank game written in Rust"
+license = "MIT"
+
+[dependencies]
+rand = "0.9"
