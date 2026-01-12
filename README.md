@@ -76,4 +76,4 @@ MIT License
 
 ## Inspiration
 
-[ I made the DUMBEST game of all time! - you should never play it ](https://www.youtube.com/shorts/oXSekoOazhA)
+- [![ I made the DUMBEST game of all time! - you should never play it ](https://www.dexerto.com/cdn-image/wp-content/uploads/2025/01/03/squid-game-russian-roulette-1.jpg?width=1200&quality=100&format=auto)](https://www.youtube.com/shorts/oXSekoOazhA)
