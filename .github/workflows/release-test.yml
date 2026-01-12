@@ -155,3 +155,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: russian_roulette-${{ github.ref_name }}-aarch64-linux-android.tar.gz
+  checksums:
+    name: Merge SHA256 checksums
+    runs-on: ubuntu-latest
+    needs: [linux, windows, macos, android]
+
+    steps:
+      - name: Download checksum artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: checksums
+
+      - name: Merge checksum files
+        run: |
+          cat checksums/**/SHA256SUMS-*.txt > SHA256SUMS.txt
+
+      - name: Show merged checksums
+        run: cat SHA256SUMS.txt
+
+      - name: Upload merged checksum file
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SHA256SUMS.txt
