@@ -60,7 +60,7 @@ gameplay mechanics ⏳.
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ TODO
 
 - [x] 🧠 Core gameplay logic
 - [x] 🖥️ Terminal UI
