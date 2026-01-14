@@ -129,7 +129,9 @@ jobs:
       - name: Add Android toolchain to PATH
         run: |
           echo "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_PATH
-
+      - name: Configure linker for Rust
+        run: |
+          echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android21-clang" >> $GITHUB_ENV
 
       - name: Build Android release
         run: cargo build --release --target aarch64-linux-android
